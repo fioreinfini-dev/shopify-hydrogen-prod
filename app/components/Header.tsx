@@ -30,37 +30,34 @@ export function Header({ header, isLoggedIn, cart }: HeaderProps) {
 }
 
 type HeaderMenuProps = {
-  menu: HeaderProps['header']['menu'];
-  viewport: Viewport;
+  menu: any;  // Replace 'any' with the actual type
+  viewport: string;
   onNavLinkClick?: () => void;
-}
+};
 
 export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) {
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [hoveredItems, setHoveredItems] = useState<Set<string>>(new Set());
   const timeoutRef = useRef<number | null>(null);
 
   const handleMouseOver = (id: string) => {
-    console.log('Mouse over:', id);
     if (timeoutRef.current !== null) {
       clearTimeout(timeoutRef.current);
     }
-    setHoveredItem(id);
+    setHoveredItems((prev) => new Set([...prev, id]));
   };
 
   const handleMouseLeave = () => {
-    console.log('Mouse leave');
     timeoutRef.current = setTimeout(() => {
-      setHoveredItem(null);
+      setHoveredItems(new Set());
     }, 200); // Delay the closing of the submenu by 200ms
   };
 
   const renderMenuItem = (item: any, level: number = 0) => {
-    console.log('Rendering menu item:', item, 'at level:', level);
     if (!item.url) return null;
 
     return (
       <div
-        className="relative"
+        className="relative group"
         key={item.id}
         onMouseOver={() => handleMouseOver(item.id)}
         onMouseLeave={handleMouseLeave}
@@ -80,9 +77,10 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
         >
           {item.title}
         </NavLink>
-        {item.items && item.items.length > 0 && hoveredItem === item.id && (
+        {item.items && item.items.length > 0 && hoveredItems.has(item.id) && (
           <div
-            className={`absolute ${level === 0 ? 'left-0 mt-2' : 'top-0 left-full ml-2'} bg-white shadow-md`}
+            className={`absolute ${level === 0 ? 'left-0 mt-2' : 'top-0 left-full ml-2'} bg-white shadow-md z-10`}
+            style={{ minWidth: '200px' }}
           >
             {item.items.map((subItem: any) => renderMenuItem(subItem, level + 1))}
           </div>
@@ -90,6 +88,9 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
       </div>
     );
   };
+
+
+
 
   return (
     <nav
