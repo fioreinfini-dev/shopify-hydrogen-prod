@@ -53,19 +53,25 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
     }
   
     if (level === 0) {
-      // For 1st level parent, open its immediate children
-      setHoveredItems(new Set(menu.items.find((item: any) => item.id === id)?.items.map((child: any) => child.id) || []));
+      const hoveredChildren = menu.items.find((item: any) => item.id === id)?.items.map((child: any) => child.id) || [];
+      console.log('Hovered children for level 0:', hoveredChildren);
+      setHoveredItems(new Set(hoveredChildren));
       setHoveredParent(id);
     } else if (level === 1) {
-      // For 2nd level parent, open its immediate children
       const parentItem = menu.items.find((item: any) => item.items.find((child: any) => child.id === id));
-      setHoveredItems(new Set(parentItem?.items.map((child: any) => child.id) || []));
+      const hoveredChildren = parentItem?.items.map((child: any) => child.id) || [];
+      console.log('Hovered children for level 1:', hoveredChildren);
+      setHoveredItems(new Set(hoveredChildren));
       setHoveredParent(id);
     } else {
-      // For 3rd level or deeper, only open its own children
-      setHoveredItems(new Set([id, ...menu.items.find((item: any) => item.items.find((child: any) => child.id === id))?.items.map((child: any) => child.id) || []]));
+      const hoveredChildren = [id, ...menu.items.find((item: any) => item.items.find((child: any) => child.id === id))?.items.map((child: any) => child.id) || []];
+      console.log('Hovered children for level 2 or deeper:', hoveredChildren);
+      setHoveredItems(new Set(hoveredChildren));
     }
   };
+  
+  
+
   
   
 
@@ -87,7 +93,10 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
   const renderMenuItem = (item: any, level: number = 0) => {
     console.log(`Rendering menu item with id ${item.id} at level ${level}`);
     if (!item.url) return null;
-
+  
+    const shouldRenderSubmenu = item.items && item.items.length > 0 && (hoveredItems.has(item.id) || (hoveredParent === item.id && level === 0));
+    console.log(`Should render submenu for item with id ${item.id}:`, shouldRenderSubmenu);
+  
     return (
       <div
         className="relative group"
@@ -110,7 +119,7 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
         >
           {item.title}
         </NavLink>
-        {item.items && item.items.length > 0 && (hoveredItems.has(item.id) || hoveredParent === item.id) && (
+        {shouldRenderSubmenu && (
           <div
             className={`absolute ${level === 0 ? 'left-0 mt-2' : 'top-0 left-full ml-2'} bg-white shadow-md z-10`}
             style={{ minWidth: '200px' }}
@@ -121,6 +130,9 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
       </div>
     );
   };
+  
+  
+  
 
 
 
