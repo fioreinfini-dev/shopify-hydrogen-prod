@@ -1,4 +1,4 @@
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import type {V2_MetaFunction} from '@shopify/remix-oxygen';
 import {defer, redirect, type LoaderArgs} from '@shopify/remix-oxygen';
 import type {FetcherWithComponents} from '@remix-run/react';
@@ -108,11 +108,18 @@ export default function Product() {
   const { product, variants } = useLoaderData<typeof loader>();
   const { selectedVariant, images } = product;
 
+  const [activeImage, setActiveImage] = useState((images.edges[0]?.node as any)?.src || '');
+  const [activeIndex, setActiveIndex] = useState(0);  // Add state for active index
+
   return (
     <div className="container grid items-start p-4 mx-auto md:gap-16 md:grid-cols-2">
       <div>
-        {selectedVariant?.image && <ProductImage image={selectedVariant.image} />}
-        <ProductThumbnails images={images.edges} />
+        <img 
+          src={activeImage || (selectedVariant?.image as any)?.src} 
+          alt="Main Product Image" 
+          className="object-cover w-full h-full" 
+        />
+        <ProductThumbnails images={images.edges} setActiveImage={setActiveImage} activeIndex={activeIndex} setActiveIndex={setActiveIndex} /> {/* Pass activeIndex and setActiveIndex as props */}
       </div>
       <ProductMain
         selectedVariant={selectedVariant}
@@ -122,6 +129,9 @@ export default function Product() {
     </div>
   );
 }
+
+
+
 
 
 
@@ -145,21 +155,27 @@ function ProductImage({image}: {image: ProductVariantFragment['image']}) {
   );
 }
 
-function ProductThumbnails({ images }: { images: any[] }) {
+function ProductThumbnails({ images, setActiveImage, activeIndex, setActiveIndex }: { images: any[], setActiveImage: Function, activeIndex: number, setActiveIndex: Function }) {
   return (
-    <div className="flex space-x-2 mt-4"> {/* Container styling */}
+    <div className="flex space-x-4 mt-4"> {/* Increased spacing between thumbnails */}
       {images.map((image, index) => (
         <img 
           key={index} 
           src={image.node.src} 
           alt={`Thumbnail ${index + 1}`} 
-          className="w-16 h-16 object-cover rounded border border-gray-300" 
-          // Thumbnail styling: width and height set to 4rem (16), object-cover to maintain aspect ratio
+          className={`w-24 h-24 object-cover rounded border cursor-pointer ${index === activeIndex ? 'border-blue-500' : 'border-gray-300'}`}  /* Increased size to 6rem (24), added cursor-pointer */
+          onClick={() => {
+            setActiveImage(image.node.src);
+            setActiveIndex(index);
+          }}
         />
       ))}
     </div>
   );
 }
+
+
+
 
 
 
