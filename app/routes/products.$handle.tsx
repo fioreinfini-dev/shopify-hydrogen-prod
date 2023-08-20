@@ -113,20 +113,50 @@ export default function Product() {
 
   useEffect(() => {
     if (selectedVariant?.image) {
-      const newActiveImage = selectedVariant.image.url; // Changed this line
+      const newActiveImage = selectedVariant.image.url;
       setActiveImage(newActiveImage);
       setActiveIndex(0);
     }
   }, [selectedVariant]);
 
+  const handlePrevImage = () => {
+    const newIndex = Math.max(activeIndex - 1, 0);
+    setActiveIndex(newIndex);
+    setActiveImage(images.edges[newIndex]?.node.src || '');
+  };
+
+  const handleNextImage = () => {
+    const newIndex = Math.min(activeIndex + 1, images.edges.length - 1);
+    setActiveIndex(newIndex);
+    setActiveImage(images.edges[newIndex]?.node.src || '');
+  };
+
   return (
     <div className="container grid items-start p-4 mx-auto md:gap-16 md:grid-cols-2">
       <div>
-        <img 
-          src={activeImage || (selectedVariant?.image as any)?.src} 
-          alt="Main Product Image" 
-          className="object-cover w-full h-full" 
-        />
+        <div className="relative">
+          <img 
+            src={activeImage || (selectedVariant?.image as any)?.src} 
+            alt="Main Product Image" 
+            className="object-cover w-full h-full fade-in" // Added fade-in class
+          />
+          <button
+            onClick={handlePrevImage}
+            className="absolute top-1/2 left-4 p-2 bg-gray-700 bg-opacity-50 text-white rounded-full transition-transform transform hover:scale-110 hover:bg-opacity-70"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={handleNextImage}
+            className="absolute top-1/2 right-4 p-2 bg-gray-700 bg-opacity-50 text-white rounded-full transition-transform transform hover:scale-110 hover:bg-opacity-70"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
         <ProductThumbnails images={images.edges} setActiveImage={setActiveImage} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
       </div>
       <ProductMain
@@ -137,12 +167,6 @@ export default function Product() {
     </div>
   );
 }
-
-
-
-
-
-
 
 
 

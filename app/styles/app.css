@@ -96,6 +96,27 @@ aside main {
   }
 }
 
+
+/*
+* --------------------------------------------------
+* components/Product Image Transition
+* --------------------------------------------------
+*/
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation-name: fadeIn;
+  animation-duration: 0.5s;
+}
+
+
 /*
 * --------------------------------------------------
 * components/Cart
