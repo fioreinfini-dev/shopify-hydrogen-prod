@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Await, NavLink, useMatches } from '@remix-run/react';
 import { Suspense } from 'react';
 import type { LayoutProps } from './Layout';
@@ -36,31 +36,53 @@ type HeaderMenuProps = {
 };
 
 export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) {
+  
   const [hoveredItems, setHoveredItems] = useState<Set<string>>(new Set());
   const timeoutRef = useRef<number | null>(null);
+  const [hoveredParent, setHoveredParent] = useState<string | null>(null);
+  useEffect(() => {
+    console.log('Hovered Items:', Array.from(hoveredItems));
+    console.log('Hovered Parent:', hoveredParent);
+  }, [hoveredItems, hoveredParent]);
 
-  const handleMouseOver = (id: string) => {
+
+  const handleMouseOver = (id: string, level: number) => {
+    console.log(`Mouse over item with id ${id} at level ${level}`);
     if (timeoutRef.current !== null) {
       clearTimeout(timeoutRef.current);
     }
     setHoveredItems((prev) => new Set([...prev, id]));
+    if (level === 0) {
+      setHoveredParent(id);
+    }
   };
+  
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (id: string) => {
+    console.log(`Mouse left item with id ${id}`);
     timeoutRef.current = setTimeout(() => {
-      setHoveredItems(new Set());
+      setHoveredItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+      if (hoveredParent === id) {
+        setHoveredParent(null);
+      }
     }, 200); // Delay the closing of the submenu by 200ms
   };
+  
 
   const renderMenuItem = (item: any, level: number = 0) => {
+    console.log(`Rendering menu item with id ${item.id} at level ${level}`);
     if (!item.url) return null;
 
     return (
       <div
         className="relative group"
         key={item.id}
-        onMouseOver={() => handleMouseOver(item.id)}
-        onMouseLeave={handleMouseLeave}
+        onMouseOver={() => handleMouseOver(item.id, level)}
+        onMouseLeave={() => handleMouseLeave(item.id)}
       >
         <NavLink
           className={({ isActive, isPending }) => `
@@ -77,7 +99,7 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
         >
           {item.title}
         </NavLink>
-        {item.items && item.items.length > 0 && hoveredItems.has(item.id) && (
+        {item.items && item.items.length > 0 && (hoveredItems.has(item.id) || hoveredParent === item.id) && (
           <div
             className={`absolute ${level === 0 ? 'left-0 mt-2' : 'top-0 left-full ml-2'} bg-white shadow-md z-10`}
             style={{ minWidth: '200px' }}
@@ -97,7 +119,7 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
       className={`gap-1 ${viewport === 'mobile' ? 'flex flex-col' : 'ml-3 hidden md:flex'}`}
       role="navigation"
     >
-      {(menu || FALLBACK_HEADER_MENU).items.map((item) => renderMenuItem(item))}
+      {(menu || FALLBACK_HEADER_MENU).items.map((item: any) => renderMenuItem(item))}
     </nav>
   );
 }
