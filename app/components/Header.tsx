@@ -51,11 +51,22 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
     if (timeoutRef.current !== null) {
       clearTimeout(timeoutRef.current);
     }
-    setHoveredItems((prev) => new Set([...prev, id]));
+  
     if (level === 0) {
+      // For 1st level parent, open its immediate children
+      setHoveredItems(new Set(menu.items.find((item: any) => item.id === id)?.items.map((child: any) => child.id) || []));
       setHoveredParent(id);
+    } else if (level === 1) {
+      // For 2nd level parent, open its immediate children
+      const parentItem = menu.items.find((item: any) => item.items.find((child: any) => child.id === id));
+      setHoveredItems(new Set(parentItem?.items.map((child: any) => child.id) || []));
+      setHoveredParent(id);
+    } else {
+      // For 3rd level or deeper, only open its own children
+      setHoveredItems(new Set([id, ...menu.items.find((item: any) => item.items.find((child: any) => child.id === id))?.items.map((child: any) => child.id) || []]));
     }
   };
+  
   
 
   const handleMouseLeave = (id: string) => {
@@ -70,7 +81,7 @@ export function HeaderMenu({ menu, viewport, onNavLinkClick }: HeaderMenuProps) 
         setHoveredParent(null);
       }
     }, 200); // Delay the closing of the submenu by 200ms
-  };
+  };  
   
 
   const renderMenuItem = (item: any, level: number = 0) => {
