@@ -1,4 +1,4 @@
-import {Suspense, useState} from 'react';
+import {Suspense, useState, useEffect} from 'react';
 import type {V2_MetaFunction} from '@shopify/remix-oxygen';
 import {defer, redirect, type LoaderArgs} from '@shopify/remix-oxygen';
 import type {FetcherWithComponents} from '@remix-run/react';
@@ -109,7 +109,15 @@ export default function Product() {
   const { selectedVariant, images } = product;
 
   const [activeImage, setActiveImage] = useState((images.edges[0]?.node as any)?.src || '');
-  const [activeIndex, setActiveIndex] = useState(0);  // Add state for active index
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (selectedVariant?.image) {
+      const newActiveImage = selectedVariant.image.url; // Changed this line
+      setActiveImage(newActiveImage);
+      setActiveIndex(0);
+    }
+  }, [selectedVariant]);
 
   return (
     <div className="container grid items-start p-4 mx-auto md:gap-16 md:grid-cols-2">
@@ -119,7 +127,7 @@ export default function Product() {
           alt="Main Product Image" 
           className="object-cover w-full h-full" 
         />
-        <ProductThumbnails images={images.edges} setActiveImage={setActiveImage} activeIndex={activeIndex} setActiveIndex={setActiveIndex} /> {/* Pass activeIndex and setActiveIndex as props */}
+        <ProductThumbnails images={images.edges} setActiveImage={setActiveImage} activeIndex={activeIndex} setActiveIndex={setActiveIndex} />
       </div>
       <ProductMain
         selectedVariant={selectedVariant}
