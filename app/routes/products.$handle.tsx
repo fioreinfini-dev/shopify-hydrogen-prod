@@ -147,13 +147,21 @@ function ProductImage({image}: {image: ProductVariantFragment['image']}) {
 
 function ProductThumbnails({ images }: { images: any[] }) {
   return (
-    <div className="product-thumbnails">
+    <div className="flex space-x-2 mt-4"> {/* Container styling */}
       {images.map((image, index) => (
-        <img key={index} src={image.node.src} alt={`Thumbnail ${index + 1}`} />
+        <img 
+          key={index} 
+          src={image.node.src} 
+          alt={`Thumbnail ${index + 1}`} 
+          className="w-16 h-16 object-cover rounded border border-gray-300" 
+          // Thumbnail styling: width and height set to 4rem (16), object-cover to maintain aspect ratio
+        />
       ))}
     </div>
   );
 }
+
+
 
 function ProductMain({
   selectedVariant,
