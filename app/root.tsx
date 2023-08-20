@@ -226,6 +226,7 @@ const HEADER_QUERY = `#graphql
       }
     }
   }
+
   query Header(
     $country: CountryCode
     $headerMenuHandle: String!
@@ -235,11 +236,36 @@ const HEADER_QUERY = `#graphql
       ...Shop
     }
     menu(handle: $headerMenuHandle) {
-      ...Menu
+      id
+      items {
+        id
+        title
+        type
+        url
+        items {
+          id
+          title
+          type
+          url
+          items {
+            id
+            title
+            type
+            url
+            items {
+              id
+              title
+              type
+              url
+            }
+          }
+        }
+      }
     }
   }
-  ${MENU_FRAGMENT}
 ` as const;
+
+
 
 const FOOTER_QUERY = `#graphql
   query Footer(
